@@ -1,0 +1,105 @@
+
+
+/* Header */
+.large-header {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	background: #333;
+	overflow: hidden;
+	background-size: cover;
+	background-position: center center;
+	z-index: 1;
+}
+
+.large-header {
+	background-image: url('../img/demo-1-bg.jpg');
+}
+
+#main-title {
+	margin-top: 50px;
+}
+
+#contact{
+	margin-top: 20px;
+}
+
+#photo{
+	margin: 0 auto;
+	margin-top: 120px;
+	max-width:200px;
+}
+
+#eso{
+	font-size: 7pt;
+}
+
+.main-title{
+	text-transform: uppercase;
+	font-size: 4.2em;
+	letter-spacing: 0.1em;
+}
+
+.main-title .thin {
+	font-weight: 200;
+}
+
+@media only screen and (max-width : 768px) {
+	.main-title {
+		font-size: 3em;
+	}
+	
+	#photo{
+	margin: 0 auto;
+	margin-top: 40px;
+	max-width:150px;
+}
+
+}
+
+/*--
+	Define color for element below :
+	1. Gradient overlay color
+	2. Close info link hover color
+	3. Service icon hover color
+	4. Contact icon hover color
+	5. Back to top link hover color
+	6. Form and button hover color
+--*/
+
+/*-- ========== GRADIENT OVERLAY ============ --*/
+.overlay{
+	background: black;
+}
+/*-- ========== CLOSE INFO & BACK TO TOP ============ --*/
+.info-container .hover-effect-1 a:hover:after,
+.info-container .hover-effect-1 a:hover:before{
+	background:#d96459;
+}
+.info-container .close-link a:hover,
+.info-container .backtop-link a:hover
+{
+	color:#d96459;
+}
+/*-- ========== SERVICE & CONTACT ICON ============ --*/
+.about .about-services .service-container:hover .services .name,
+.about .about-services .service-container:hover .services .icon,
+.contact-location .location-container:hover .location .icon,
+.contact-location .location-container:hover .location .name
+{
+	color:#d96459;
+}
+/*-- ========== FORM & BUTTON ============ --*/
+button[type="submit"].submit-subscribe:hover{
+	background:#d96459;
+	color:white;
+}
+button[type="submit"].submit-message:hover{
+	background:#d96459;
+	color:white;
+	border:1px solid #d96459;
+}
+input[type="text"]:focus, textarea:focus{
+	border-bottom:1px solid #d96459;
+}
+
