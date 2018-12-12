@@ -1,185 +1,136 @@
-(function() {
+/*--
 
-    var width, height, largeHeader, canvas, ctx, points, target, animateHeader = true;
+TABLE OF CONTENTS
+1. function to reveal element 						line 26
+2. show home element 								line 50
+3. reveal element on scroll 						line 68
+4. reveal element on scroll (in small devices) 		line 75
+5. open theme switcher 								line 84
+6. change color theme 								line 94
+7. more info clicked 								line 101
+8. close info link clicked 							line 130
+9. activate backstretch 							line 152
+10. activate countdown 								line 161
+11. back to top link clicked 						line 174
+--*/
 
-    // Main
-    initHeader();
-    initAnimation();
-    addListeners();
-
-    function initHeader() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        target = {x: width/2, y: height/2};
-
-        largeHeader = document.getElementById('large-header');
-        largeHeader.style.height = height+'px';
-
-        canvas = document.getElementById('demo-canvas');
-        canvas.width = width;
-        canvas.height = height;
-        ctx = canvas.getContext('2d');
-
-        // create points
-        points = [];
-        for(var x = 0; x < width; x = x + width/20) {
-            for(var y = 0; y < height; y = y + height/20) {
-                var px = x + Math.random()*width/20;
-                var py = y + Math.random()*height/20;
-                var p = {x: px, originX: px, y: py, originY: py };
-                points.push(p);
-            }
-        }
-
-        // for each point find the 5 closest points
-        for(var i = 0; i < points.length; i++) {
-            var closest = [];
-            var p1 = points[i];
-            for(var j = 0; j < points.length; j++) {
-                var p2 = points[j]
-                if(!(p1 == p2)) {
-                    var placed = false;
-                    for(var k = 0; k < 5; k++) {
-                        if(!placed) {
-                            if(closest[k] == undefined) {
-                                closest[k] = p2;
-                                placed = true;
-                            }
-                        }
-                    }
-
-                    for(var k = 0; k < 5; k++) {
-                        if(!placed) {
-                            if(getDistance(p1, p2) < getDistance(p1, closest[k])) {
-                                closest[k] = p2;
-                                placed = true;
-                            }
-                        }
-                    }
-                }
-            }
-            p1.closest = closest;
-        }
-
-        // assign a circle to each point
-        for(var i in points) {
-            var c = new Circle(points[i], 2+Math.random()*2, 'rgba(255,255,255,0.3)');
-            points[i].circle = c;
-        }
-    }
-
-    // Event handling
-    function addListeners() {
-        if(!('ontouchstart' in window)) {
-            window.addEventListener('mousemove', mouseMove);
-        }
-        window.addEventListener('scroll', scrollCheck);
-        window.addEventListener('resize', resize);
-    }
-
-    function mouseMove(e) {
-        var posx = posy = 0;
-        if (e.pageX || e.pageY) {
-            posx = e.pageX;
-            posy = e.pageY;
-        }
-        else if (e.clientX || e.clientY)    {
-            posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-        }
-        target.x = posx;
-        target.y = posy;
-    }
-
-    function scrollCheck() {
-        if(document.body.scrollTop > height) animateHeader = false;
-        else animateHeader = true;
-    }
-
-    function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        largeHeader.style.height = height+'px';
-        canvas.width = width;
-        canvas.height = height;
-    }
-
-    // animation
-    function initAnimation() {
-        animate();
-        for(var i in points) {
-            shiftPoint(points[i]);
-        }
-    }
-
-    function animate() {
-        if(animateHeader) {
-            ctx.clearRect(0,0,width,height);
-            for(var i in points) {
-                // detect points in range
-                if(Math.abs(getDistance(target, points[i])) < 4000) {
-                    points[i].active = 0.3;
-                    points[i].circle.active = 0.6;
-                } else if(Math.abs(getDistance(target, points[i])) < 20000) {
-                    points[i].active = 0.1;
-                    points[i].circle.active = 0.3;
-                } else if(Math.abs(getDistance(target, points[i])) < 40000) {
-                    points[i].active = 0.02;
-                    points[i].circle.active = 0.1;
-                } else {
-                    points[i].active = 0;
-                    points[i].circle.active = 0;
-                }
-
-                drawLines(points[i]);
-                points[i].circle.draw();
-            }
-        }
-        requestAnimationFrame(animate);
-    }
-
-    function shiftPoint(p) {
-        TweenLite.to(p, 1+1*Math.random(), {x:p.originX-50+Math.random()*100,
-            y: p.originY-50+Math.random()*100, ease:Circ.easeInOut,
-            onComplete: function() {
-                shiftPoint(p);
-            }});
-    }
-
-    // Canvas manipulation
-    function drawLines(p) {
-        if(!p.active) return;
-        for(var i in p.closest) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p.closest[i].x, p.closest[i].y);
-            ctx.strokeStyle = 'rgba(156,217,249,'+ p.active+')';
-            ctx.stroke();
-        }
-    }
-
-    function Circle(pos,rad,color) {
-        var _this = this;
-
-        // constructor
-        (function() {
-            _this.pos = pos || null;
-            _this.radius = rad || null;
-            _this.color = color || null;
-        })();
-
-        this.draw = function() {
-            if(!_this.active) return;
-            ctx.beginPath();
-            ctx.arc(_this.pos.x, _this.pos.y, _this.radius, 0, 2 * Math.PI, false);
-            ctx.fillStyle = 'rgba(156,217,249,'+ _this.active+')';
-            ctx.fill();
-        };
-    }
-
-    // Util
-    function getDistance(p1, p2) {
-        return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
-    }
-    
-})();
+(function($) {
+	'use strict';
+	
+	//-- function to reveal element that entering viewport (in info section)
+	function RevealElement(){
+		'use strict';
+		
+		var topOfWindow;
+		var revealFactor = $(window).height();
+				
+		//-- if in extra small device
+		if($(window).width()<768){
+			topOfWindow = $(window).scrollTop();
+		}
+		else{
+			topOfWindow = $('#info-wrapper').scrollTop();
+		}
+		
+		var element_class = ["close-link","contact"];
+		
+		for(var i=0;i<element_class.length;i++){
+			if($('.'+element_class[i]).offset().top < (topOfWindow+revealFactor)){
+				$('.'+element_class[i]).addClass('fadeInUp');
+			}
+		}
+	}
+	
+	//-- show home element
+	$(window).load(function() {
+		$('#preloader').addClass('fadeOut');
+		//-- hide preloader div
+		setTimeout(function(){
+			$('#preloader').css('z-index','1');
+		},1000);
+		
+		//-- disable hide-after class (hide after -> for smoother animation on entrance)
+		setTimeout(function(){
+			$('.info-link').removeClass('hide-after');
+		},1500);
+		
+		
+		$('header, .home h1, .days_dash').addClass('fadeInDown');
+		$('footer, .info-link, .hours_dash').addClass('fadeInUp');
+	});
+	
+	//-- reveal element on scroll (in info section)
+	$('#info-wrapper').scroll(function(){
+		if($('#info-wrapper').is(':visible')){
+			RevealElement();
+		}
+	});
+	
+	//-- reveal element on scroll (in info section) -- IN SMALL DEVICES
+	$(window).scroll(function(){
+		if($(window).width()<768){
+			if($('#info-wrapper').is(':visible')){
+				RevealElement();
+			}
+		}
+	});
+	
+	//-- more info clicked
+	$('.more-info').click(function(e) {
+		//-- set scroll top to 0
+		$('html,body').animate({
+			scrollTop:0
+		},100,"easeOutCirc",function(){
+			//-- hide home section
+		$('#home-wrapper').addClass('zoomOut');
+		
+		//-- show info section
+		$('#info-wrapper').show('fast',function(){
+			$(this).css({
+				opacity:1,
+				top:0
+			});
+		});
+				
+		//-- show info content
+		setTimeout(function(){
+			RevealElement();
+			//-- hide gradient overlay
+			$('.overlay').css('opacity',0.6);
+			
+			//-- for smoother entrance animation
+			$('.info-link').addClass('hide-after');
+		},1000);
+		});
+    });
+	
+	//-- close info link clicked
+	$('.close-info').click(function(e) {
+        //-- hide info section
+		$('#info-wrapper').css({
+			opacity:0,
+			top:'100%'
+		});
+		
+		//-- show gradient overlay
+		$('.overlay').css('opacity',1);
+		
+		setTimeout(function(){
+			$('#info-wrapper').hide();
+			
+			//-- enable :after and :before hover effect
+			$('.info-link').removeClass('hide-after');
+		},1000);
+		
+		//-- show home element
+		$('#home-wrapper').removeClass('zoomOut').addClass('zoomIn');
+    });
+	
+	//-- back to top link clicked
+	$('.back-to-top').click(function(e) {
+        $('#info-wrapper, html, body').animate({
+			scrollTop:0
+		},1000,"easeOutCirc");
+    });
+		
+})(jQuery);
